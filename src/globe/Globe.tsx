@@ -34,7 +34,7 @@ const Globe = (props: any) => {
                         startLng: origin.lon,
                         endLat: destination.lat,
                         endLng: destination.lon,
-                        color: "00C2CB",
+                        color: "#00C2CB",
                     };
                 } else {
                     return undefined;
