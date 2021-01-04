@@ -1,5 +1,5 @@
 import "./Globe.scss";
-import {useEffect, useMemo, useState} from "react";
+import {useEffect, useState} from "react";
 import {
     AmbientLight,
     Color, DirectionalLight,
@@ -10,45 +10,40 @@ import {
 } from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import ThreeGlobe from "three-globe";
-import {Airport, AirportResponse, Telex, TelexConnection} from "@flybywiresim/api-client";
+import {Airport, Telex, TelexConnection} from "@flybywiresim/api-client";
 
 const Globe = (props: any) => {
     const [mount, setMount] = useState<HTMLDivElement | null>();
     const [rendererState, setRender] = useState<Renderer>();
-    const airportsCache = useMemo<Map<string, AirportResponse>>(() => new Map(), []);
 
     useEffect(() => {
         buildScene();
     }, [mount]);
 
     async function fetchAirports(connections: TelexConnection[]) {
-        return Promise.all(connections.map(async conn => {
-            if (!!conn.origin && !!conn.destination) {
-                try {
-                    let arptOrigin = airportsCache.get(conn.origin);
-                    console.log(arptOrigin);
-                    if (!arptOrigin) {
-                        arptOrigin = await Airport.get(conn.origin);
-                        airportsCache.set(conn.origin, arptOrigin);
-                    }
-                    let arptDest = airportsCache.get(conn.destination);
-                    console.log(arptDest);
-                    if (!arptDest) {
-                        arptDest = await Airport.get(conn.destination);
-                        airportsCache.set(conn.destination, arptDest);
-                    }
+        try {
+            const airports = await Airport.getBatch(connections.flatMap(conn => [conn.origin, conn.destination]));
 
-                    console.log("Fetch ARPT done");
+            return connections.map(conn => {
+                const origin = airports.find(arpt => arpt.icao === conn.origin);
+                const destination = airports.find(arpt => arpt.icao === conn.destination);
+
+                if (origin?.lon && destination?.lon) {
                     return {
-                        startLat: arptOrigin.lat,
-                        startLng: arptOrigin.lon,
-                        endLat: arptDest.lat,
-                        endLng: arptDest.lon,
+                        startLat: origin.lat,
+                        startLng: origin.lon,
+                        endLat: destination.lat,
+                        endLng: destination.lon,
                         color: "00C2CB",
                     };
-                } catch (_) {}
-            }
-        }));
+                } else {
+                    return undefined;
+                }
+            });
+        } catch (e) {
+            return [];
+        }
+
     }
 
     async function buildScene() {
@@ -112,7 +107,7 @@ const Globe = (props: any) => {
                     .arcColor("color")
                     .arcDashLength(1.5)
                     .arcDashGap(2)
-                    .arcStroke(0.75)
+                    .arcStroke(0.5)
                     .arcDashInitialGap(() => Math.random() * 3)
                     .arcDashAnimateTime(2000);
                 // .arcAltitudeAutoScale(0.2);
