@@ -18,6 +18,8 @@ export type GlobeProps = Partial<{
     globeColor: string,
     arcColor: string,
     landColor: string,
+    enableZoom: boolean,
+    enableRotate: boolean,
 }>
 
 const Globe = (props: GlobeProps) => {
@@ -54,7 +56,10 @@ const Globe = (props: GlobeProps) => {
         camera.position.z = 220;
 
         // Camera Controls
-        new OrbitControls(camera, renderer.domElement);
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enablePan = false;
+        controls.enableZoom = props.enableZoom === undefined ? true : props.enableZoom;
+        controls.enableRotate = props.enableRotate === undefined ? true : props.enableRotate;
 
         // Lights
         scene.add(new AmbientLight(0xbbbbbb));
@@ -108,7 +113,8 @@ const Globe = (props: GlobeProps) => {
             .arcDashGap(2)
             .arcStroke(0.5)
             .arcDashInitialGap(() => Math.random() * 3)
-            .arcDashAnimateTime(2000);
+            .arcDashAnimateTime(2000)
+            .arcsTransitionDuration(0);
         // .arcAltitudeAutoScale(0.2);
 
         fetch('https://raw.githubusercontent.com/vasturiano/three-globe/master/example/hexed-polygons/ne_110m_admin_0_countries.geojson')
