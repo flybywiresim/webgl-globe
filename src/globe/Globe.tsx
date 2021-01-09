@@ -11,42 +11,23 @@ import {
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import ThreeGlobe from "three-globe";
 import {Airport, Telex, TelexConnection} from "@flybywiresim/api-client";
+import useInterval from "./hooks/useInterval";
 
-const Globe = (props: any) => {
+export type GlobeProps = Partial<{
+    refreshInterval: number,
+    globeColor: string,
+    arcColor: string,
+    landColor: string,
+}>
+
+const Globe = (props: GlobeProps) => {
     const [mount, setMount] = useState<HTMLDivElement | null>();
     const [rendererState, setRender] = useState<Renderer>();
+    const [globe, setGlobe] = useState<ThreeGlobe>();
+    const [arcsData, setArcsData] = useState<any[]>([]);
 
+    // Setup scene
     useEffect(() => {
-        buildScene();
-    }, [mount]);
-
-    async function fetchAirports(connections: TelexConnection[]) {
-        try {
-            const airports = await Airport.getBatch(connections.flatMap(conn => [conn.origin, conn.destination]));
-
-            return connections.map(conn => {
-                const origin = airports.find(arpt => arpt.icao === conn.origin);
-                const destination = airports.find(arpt => arpt.icao === conn.destination);
-
-                if (origin?.lon && destination?.lon) {
-                    return {
-                        startLat: origin.lat,
-                        startLng: origin.lon,
-                        endLat: destination.lat,
-                        endLng: destination.lon,
-                        color: "#00C2CB",
-                    };
-                } else {
-                    return undefined;
-                }
-            });
-        } catch (e) {
-            return [];
-        }
-
-    }
-
-    async function buildScene() {
         if (!mount) {
             return;
         }
@@ -79,46 +60,14 @@ const Globe = (props: any) => {
         scene.add(new AmbientLight(0xbbbbbb));
         scene.add(new DirectionalLight(0xffffff, 0.6));
 
-        const globe = new ThreeGlobe();
-        const globeMaterial = globe.globeMaterial();
-        globeMaterial.color = new Color("#152346");
-
-        fetch('https://raw.githubusercontent.com/vasturiano/three-globe/master/example/hexed-polygons/ne_110m_admin_0_countries.geojson')
-            .then(res => res.json())
-            .then(async countries => {
-
-                globe
-                    .hexPolygonsData(countries.features)
-                    .hexPolygonResolution(3)
-                    .hexPolygonMargin(0.85)
-                    .hexPolygonColor(() => "#fff");
-
-                let connections: TelexConnection[] = [];
-                try {
-                    connections = await Telex.fetchAllConnections();
-                } catch (e) {
-                    console.error(e);
-                }
-
-                const arcsData: any[] = (await fetchAirports(connections)).filter(c => c !== undefined);
-
-                globe
-                    .arcsData(arcsData || [])
-                    .arcColor("color")
-                    .arcDashLength(1.5)
-                    .arcDashGap(2)
-                    .arcStroke(0.5)
-                    .arcDashInitialGap(() => Math.random() * 3)
-                    .arcDashAnimateTime(2000);
-                // .arcAltitudeAutoScale(0.2);
-
-                scene.add(globe);
-            });
+        const _globe = new ThreeGlobe();
+        setGlobe(_globe);
+        scene.add(_globe);
 
         let frameId = 0;
         const animate = () => {
             //ReDraw Scene with Camera and Scene Object
-            globe.rotation.y += 0.002;
+            _globe.rotation.y += 0.002;
 
             renderScene();
             frameId = window.requestAnimationFrame(animate);
@@ -142,7 +91,81 @@ const Globe = (props: any) => {
 
         renderScene();
         startAnimation();
-    }
+    }, [mount]);
+
+    // Prepare globe
+    useEffect(() => {
+        if (!globe) {
+            return;
+        }
+
+        const globeMaterial = globe.globeMaterial();
+        globeMaterial.color = props.globeColor ? new Color(props.globeColor) : new Color("#152346");
+
+        globe
+            .arcColor("color")
+            .arcDashLength(1.5)
+            .arcDashGap(2)
+            .arcStroke(0.5)
+            .arcDashInitialGap(() => Math.random() * 3)
+            .arcDashAnimateTime(2000);
+        // .arcAltitudeAutoScale(0.2);
+
+        fetch('https://raw.githubusercontent.com/vasturiano/three-globe/master/example/hexed-polygons/ne_110m_admin_0_countries.geojson')
+            .then(res => res.json())
+            .then(async countries => {
+
+                globe
+                    .hexPolygonsData(countries.features)
+                    .hexPolygonResolution(3)
+                    .hexPolygonMargin(0.85)
+                    .hexPolygonColor(() => props.landColor || "#fff");
+            });
+    }, [globe]);
+
+    // Update flights
+    useInterval(async () => {
+        const fetchAirports = async (connections: TelexConnection[]) => {
+            try {
+                const airports = await Airport.getBatch(connections.flatMap(conn => [conn.origin, conn.destination]));
+
+                return connections.map(conn => {
+                    const origin = airports.find(arpt => arpt.icao === conn.origin);
+                    const destination = airports.find(arpt => arpt.icao === conn.destination);
+
+                    if (origin?.lon && destination?.lon) {
+                        return {
+                            startLat: origin.lat,
+                            startLng: origin.lon,
+                            endLat: destination.lat,
+                            endLng: destination.lon,
+                            color: props.arcColor || "#00C2CB",
+                        };
+                    } else {
+                        return undefined;
+                    }
+                });
+            } catch (e) {
+                return [];
+            }
+        };
+
+        try {
+            const connections = await Telex.fetchAllConnections();
+            setArcsData((await fetchAirports(connections)).filter(c => c !== undefined));
+        } catch (e) {
+            console.error(e);
+        }
+    }, props.refreshInterval || 180000, [], {runOnStart: true});
+
+    // Draw flights
+    useEffect(() => {
+        if (!globe) {
+            return;
+        }
+
+        globe.arcsData(arcsData || []);
+    }, [arcsData, globe]);
 
     return (
         <div
