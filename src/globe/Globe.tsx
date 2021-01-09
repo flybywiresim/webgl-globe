@@ -69,7 +69,7 @@ const Globe = (props: any) => {
         setRender(renderer);
 
         // Camera
-        const camera = new PerspectiveCamera(75, width / height, 0.1, 1000);
+        const camera = new PerspectiveCamera(70, width / height, 0.1, 1000);
         camera.position.z = 220;
 
         // Camera Controls
@@ -77,11 +77,11 @@ const Globe = (props: any) => {
 
         // Lights
         scene.add(new AmbientLight(0xbbbbbb));
-        scene.add(new DirectionalLight(0xffffff, 0.6));
+        scene.add(new DirectionalLight(0xffffff, 0.3));
 
         const globe = new ThreeGlobe();
         const globeMaterial = globe.globeMaterial();
-        globeMaterial.color = new Color("#152346");
+        globeMaterial.color = new Color("#131313");
 
         fetch('https://raw.githubusercontent.com/vasturiano/three-globe/master/example/hexed-polygons/ne_110m_admin_0_countries.geojson')
             .then(res => res.json())
