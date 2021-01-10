@@ -57,13 +57,15 @@ const Globe = (props: GlobeProps) => {
 
         // Camera Controls
         const controls = new OrbitControls(camera, renderer.domElement);
+        controls.minDistance = 150;
+        controls.maxDistance = 400;
         controls.enablePan = false;
         controls.enableZoom = props.enableZoom === undefined ? true : props.enableZoom;
         controls.enableRotate = props.enableRotate === undefined ? true : props.enableRotate;
 
         // Lights
         scene.add(new AmbientLight(0xbbbbbb));
-        scene.add(new DirectionalLight(0xffffff, 0.6));
+        scene.add(new DirectionalLight(0xffffff, 0.3));
 
         const _globe = new ThreeGlobe();
         setGlobe(_globe);
