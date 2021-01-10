@@ -20,6 +20,7 @@ export type GlobeProps = Partial<{
     landColor: string,
     enableZoom: boolean,
     enableRotate: boolean,
+    speedFactor: number,
 }>
 
 const Globe = (props: GlobeProps) => {
@@ -74,7 +75,7 @@ const Globe = (props: GlobeProps) => {
         let frameId = 0;
         const animate = () => {
             //ReDraw Scene with Camera and Scene Object
-            _globe.rotation.y += 0.002;
+            _globe.rotation.y += 0.002 * (props.speedFactor !== undefined ? props.speedFactor : 1);
 
             renderScene();
             frameId = window.requestAnimationFrame(animate);

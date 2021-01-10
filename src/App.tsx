@@ -7,7 +7,7 @@ function App() {
     return (
         <div className="App" style={{height: "100vh", width: "100vw"}}>
             <LogoComponent/>
-            <Globe globeColor={'#131313'}/>
+            <Globe globeColor={'#131313'} speedFactor={0.5} enableZoom={false} enableRotate={false} />
         </div>
     );
 }
