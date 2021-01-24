@@ -142,7 +142,7 @@ const Globe = (props: GlobeProps) => {
                     const origin = airports.find(arpt => arpt.icao === conn.origin);
                     const destination = airports.find(arpt => arpt.icao === conn.destination);
 
-                    if (origin?.lon && destination?.lon) {
+                    if (origin && origin.lon && destination && destination.lon) {
                         return {
                             startLat: origin.lat,
                             startLng: origin.lon,
