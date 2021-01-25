@@ -1,6 +1,6 @@
 {
   "name": "@flybywiresim/webgl-globe",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "FlyByWire Simulations live map",
   "private": false,
   "license": "MIT",
