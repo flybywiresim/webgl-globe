@@ -1,5 +1,5 @@
-import "./Globe.scss";
-import React, {useEffect, useState} from "react";
+import './Globe.scss';
+import React, { useEffect, useState } from 'react';
 import {
     AmbientLight,
     Color, DirectionalLight,
@@ -7,11 +7,11 @@ import {
     Renderer,
     Scene,
     WebGLRenderer
-} from "three";
-import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
-import ThreeGlobe from "three-globe";
-import {Airport, Telex, TelexConnection} from "@flybywiresim/api-client";
-import useInterval from "./hooks/useInterval";
+} from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import ThreeGlobe from 'three-globe';
+import { Airport, Telex, TelexConnection } from '@flybywiresim/api-client';
+import useInterval from './hooks/useInterval';
 
 export type GlobeProps = Partial<{
     refreshInterval: number,
@@ -46,8 +46,8 @@ const Globe = (props: GlobeProps): JSX.Element => {
         const scene = new Scene();
 
         // Renderer
-        const renderer = new WebGLRenderer({antialias: true, alpha: true});
-        renderer.setClearColor("#fff", 0);
+        const renderer = new WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setClearColor('#fff', 0);
         renderer.setSize(width, height);
         mount.appendChild(renderer.domElement);
         setRender(renderer);
@@ -104,10 +104,10 @@ const Globe = (props: GlobeProps): JSX.Element => {
         }
 
         const globeMaterial = globe.globeMaterial();
-        globeMaterial.color = props.globeColor ? new Color(props.globeColor) : new Color("#152346");
+        globeMaterial.color = props.globeColor ? new Color(props.globeColor) : new Color('#152346');
 
         globe
-            .arcColor("color")
+            .arcColor('color')
             .arcDashLength(1.5)
             .arcDashGap(2)
             .arcStroke(0.5)
@@ -124,7 +124,7 @@ const Globe = (props: GlobeProps): JSX.Element => {
                     .hexPolygonsData(countries.features)
                     .hexPolygonResolution(3)
                     .hexPolygonMargin(0.85)
-                    .hexPolygonColor(() => props.landColor || "#fff");
+                    .hexPolygonColor(() => props.landColor || '#fff');
             });
     }, [globe]);
 
@@ -144,7 +144,7 @@ const Globe = (props: GlobeProps): JSX.Element => {
                             startLng: origin.lon,
                             endLat: destination.lat,
                             endLng: destination.lon,
-                            color: props.arcColor || "#00C2CB",
+                            color: props.arcColor || '#00C2CB',
                         };
                     } else {
                         return undefined;
@@ -161,7 +161,7 @@ const Globe = (props: GlobeProps): JSX.Element => {
         } catch (e) {
             console.error(e);
         }
-    }, props.refreshInterval || 180000, [], {runOnStart: true});
+    }, props.refreshInterval || 180000, [], { runOnStart: true });
 
     // Draw flights
     useEffect(() => {
@@ -174,7 +174,7 @@ const Globe = (props: GlobeProps): JSX.Element => {
 
     return (
         <div
-            className={"render-target"}
+            className={'render-target'}
             ref={mount => setMount(mount)}
         />
     );

@@ -4,7 +4,7 @@ type UseIntervalOptions = Partial<{
     runOnStart: boolean
 }>
 
-function useInterval(callback: () => void, delay: number | null, deps: any[], options?: UseIntervalOptions) {
+function useInterval(callback: () => void, delay: number | null, deps: any[], options?: UseIntervalOptions): void {
     const savedCallback = useRef<() => void | null>();
 
     const _deps = [delay, ...deps];
@@ -30,6 +30,8 @@ function useInterval(callback: () => void, delay: number | null, deps: any[], op
             const id = setInterval(tick, delay);
             return () => clearInterval(id);
         }
+
+        return () => { return; };
     }, _deps);
 }
 
