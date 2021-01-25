@@ -1,5 +1,5 @@
 import "./Globe.scss";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
     AmbientLight,
     Color, DirectionalLight,
@@ -23,7 +23,7 @@ export type GlobeProps = Partial<{
     speedFactor: number,
 }>
 
-const Globe = (props: GlobeProps) => {
+const Globe = (props: GlobeProps): JSX.Element => {
     const [mount, setMount] = useState<HTMLDivElement | null>();
     const [rendererState, setRender] = useState<Renderer>();
     const [globe, setGlobe] = useState<ThreeGlobe>();
@@ -74,7 +74,7 @@ const Globe = (props: GlobeProps) => {
 
         let frameId = 0;
         const animate = () => {
-            //ReDraw Scene with Camera and Scene Object
+            // ReDraw Scene with Camera and Scene Object
             _globe.rotation.y += 0.002 * (props.speedFactor !== undefined ? props.speedFactor : 1);
 
             renderScene();
@@ -85,10 +85,6 @@ const Globe = (props: GlobeProps) => {
             if (frameId === 0) {
                 frameId = requestAnimationFrame(animate);
             }
-        };
-
-        const stopAnimation = () => {
-            cancelAnimationFrame(frameId);
         };
 
         const renderScene = () => {
