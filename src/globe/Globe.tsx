@@ -51,6 +51,19 @@ const Globe = (props: GlobeProps): JSX.Element => {
         renderer.setSize(width, height);
         mount.appendChild(renderer.domElement);
         setRender(renderer);
+        window.addEventListener( 'resize', onWindowResize );
+
+        function onWindowResize() {
+
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize( width, height );
+
+        }
 
         // Camera
         const camera = new PerspectiveCamera(75, width / height, 0.1, 1000);
